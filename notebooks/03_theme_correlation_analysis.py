@@ -1,7 +1,4 @@
-"""
-Theme Correlation Analysis - Reveals which climate topics are typically addressed together
-Run this after 01_export_excel_sheets.py to explore relationships between themes
-"""
+#Correlation Analysis
 
 import pandas as pd
 import seaborn as sns
@@ -12,18 +9,17 @@ import sys
 from scipy.cluster import hierarchy
 from scipy.spatial.distance import squareform
 
-# Add project root to path to import config
+
 script_dir = Path(__file__).resolve().parent
 project_root = script_dir.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-# Import themes from config
+
 try:
     from Data_Analysis.config import THEME_LABELS
-    print(f"✓ Loaded {len(THEME_LABELS)} themes from config")
+    print(f"Loaded {len(THEME_LABELS)} themes from config")
 except ImportError:
-    # Fallback theme list
     THEME_LABELS = [
         "Mitigation & Decarbonisation",
         "Adaptation & Resilience",
@@ -42,22 +38,18 @@ except ImportError:
         "Just Transition & Social Inclusion"
     ]
 
-# Setup paths
+
 data_processed = project_root / "data" / "processed"
 figures_dir = project_root / "reports" / "figures"
 figures_dir.mkdir(parents=True, exist_ok=True)
 
-print(f"\n📁 Data directory: {data_processed}")
-print(f"📁 Saving figures to: {figures_dir}\n")
+print(f"\n Data directory: {data_processed}")
+print(f"Saving figures to: {figures_dir}\n")
 
-# ============================================================
-# MAIN ANALYSIS
-# ============================================================
 
-# Load your data
 df_national = pd.read_csv(data_processed / "National_Policy_Country_Shares.csv")
 
-# Get just the theme columns
+
 id_cols = ['country_or_category', 'document_type', 'governance']
 theme_cols = [col for col in df_national.columns if col in THEME_LABELS]
 print(f"Analyzing {len(theme_cols)} themes across {len(df_national)} countries\n")
@@ -96,10 +88,10 @@ plt.title('Climate Theme Clusters: Which Topics Travel Together?\n(National Clim
           fontsize=14, fontweight='bold')
 plt.tight_layout()
 plt.savefig(figures_dir / 'theme_clusters_correlation.svg', dpi=300, bbox_inches='tight')
-print(f"✓ Saved correlation matrix to: {figures_dir / 'theme_clusters_correlation.svg'}")
+print(f"Saved correlation matrix to: {figures_dir / 'theme_clusters_correlation.svg'}")
 
 # Print the clusters found
-print("\n🔍 THEME CLUSTERS FOUND:")
+print("\n THEME CLUSTERS FOUND:")
 print("="*50)
 unique_clusters = np.unique(cluster_ids)
 for cluster_id in unique_clusters:
@@ -107,10 +99,9 @@ for cluster_id in unique_clusters:
                         if cluster_ids[i] == cluster_id]
     print(f"\nCluster {cluster_id}:")
     for theme in themes_in_cluster:
-        print(f"  • {theme}")
+        print(f"{theme}")
 
-# Optional: Compare across governance levels
-print("\n\n📊 Comparing Across Governance Levels...")
+print("\n Comparing Across Governance Levels...")
 print("="*50)
 
 datasets = {
@@ -136,6 +127,6 @@ for ax, (name, df) in zip(axes, datasets.items()):
     
 plt.tight_layout()
 plt.savefig(figures_dir / 'governance_level_comparison.svg', dpi=300, bbox_inches='tight')
-print(f"✓ Saved governance comparison to: {figures_dir / 'governance_level_comparison.svg'}")
+print(f"Saved governance comparison to: {figures_dir / 'governance_level_comparison.svg'}")
 
-print("\n✅ Analysis complete! Check the figures folder for outputs.")
+print("\n Analysis complete!")
