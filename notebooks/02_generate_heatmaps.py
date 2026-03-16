@@ -1,8 +1,4 @@
-"""
-Generate publication-quality heatmaps for climate policy themes across governance levels.
-Loads data from processed CSVs and saves SVGs to reports/figures/.
-Uses theme definitions from config.py for consistent labeling.
-"""
+# Generate heatmaps
 
 import pandas as pd
 import seaborn as sns
@@ -12,9 +8,8 @@ import numpy as np
 from pathlib import Path
 import sys
 
-# ============================================================
-# ADD PROJECT ROOT TO PATH TO IMPORT CONFIG
-# ============================================================
+
+
 script_dir = Path(__file__).resolve().parent
 if script_dir.name == "notebooks":
     project_root = script_dir.parent
@@ -28,9 +23,9 @@ if str(project_root) not in sys.path:
 # Import themes from config
 try:
     from Data_Analysis.config import THEME_LABELS, THEME_BY_LABEL
-    print(f"✓ Successfully loaded {len(THEME_LABELS)} themes from config")
+    print(f"Successfully loaded {len(THEME_LABELS)} themes from config")
 except ImportError as e:
-    print(f"⚠️ Couldn't import from config: {e}")
+    print(f"Couldn't import from config: {e}")
     print("Using fallback theme list...")
     # Fallback theme list if config can't be found
     THEME_LABELS = [
@@ -51,20 +46,17 @@ except ImportError as e:
         "Just Transition & Social Inclusion"
     ]
 
-# ============================================================
-# SETUP PATHS
-# ============================================================
+
+
 data_processed = project_root / "data" / "processed"
 figures_dir = project_root / "reports" / "figures"
 figures_dir.mkdir(parents=True, exist_ok=True)
 
-print(f"\n📁 Project root: {project_root}")
-print(f"📁 Data directory: {data_processed}")
-print(f"📁 Saving figures to: {figures_dir}\n")
+print(f"\n Project root: {project_root}")
+print(f"Data directory: {data_processed}")
+print(f"Saving figures to: {figures_dir}\n")
 
-# ============================================================
-# PUBLICATION-QUALITY SETTINGS
-# ============================================================
+
 plt.rcParams.update({
     "figure.dpi": 300,
     "savefig.dpi": 300,
@@ -80,35 +72,29 @@ plt.rcParams.update({
 
 sns.set_style("white")
 
-# ============================================================
-# LOAD THE DATA
-# ============================================================
-
-print("📂 Loading processed data...")
+print("Loading processed data...")
 
 # Dataset 1: National Climate Policies
 df_national = pd.read_csv(data_processed / "National_Policy_Country_Shares.csv")
-print(f"  ✓ National policies: {df_national.shape[0]} countries")
-print(f"    Columns: {list(df_national.columns)}")
+print(f"National policies: {df_national.shape[0]} countries")
+print(f" Columns: {list(df_national.columns)}")
 
 # Dataset 2: Paris Agreement Submissions (UNFCCC)
 df_paris = pd.read_csv(data_processed / "UNFCCC_Country_Shares.csv")
-print(f"  ✓ Paris Agreement: {df_paris.shape[0]} countries")
-print(f"    Columns: {list(df_paris.columns)}")
+print(f"Paris Agreement: {df_paris.shape[0]} countries")
+print(f" Columns: {list(df_paris.columns)}")
 
 # Dataset 3: African Union Documents
 df_au = pd.read_csv(data_processed / "AU_Category_Shares.csv")
-print(f"  ✓ AU documents: {df_au.shape[0]} document types")
-print(f"    Columns: {list(df_au.columns)}")
+print(f"AU documents: {df_au.shape[0]} document types")
+print(f" Columns: {list(df_au.columns)}")
 
 # Dataset 4: Architecture Theme Shares (for line plot)
 df_architecture = pd.read_csv(data_processed / "Architecture_Theme_Shares.csv")
-print(f"  ✓ Architecture shares: {df_architecture.shape[0]} governance levels")
-print(f"    Columns: {list(df_architecture.columns)}\n")
+print(f"Architecture shares: {df_architecture.shape[0]} governance levels")
+print(f" Columns: {list(df_architecture.columns)}\n")
 
-# ============================================================
-# ENSURE ALL DATAFRAMES HAVE THE SAME THEME COLUMNS (FROM CONFIG)
-# ============================================================
+#Themes
 
 # Get the columns that are actually themes (the ones in THEME_LABELS)
 def get_theme_columns(df):
@@ -121,14 +107,11 @@ paris_themes = get_theme_columns(df_paris)
 au_themes = get_theme_columns(df_au)
 arch_themes = get_theme_columns(df_architecture)
 
-print(f"  ✓ Found {len(national_themes)} themes in national data")
-print(f"  ✓ Found {len(paris_themes)} themes in Paris data")
-print(f"  ✓ Found {len(au_themes)} themes in AU data")
-print(f"  ✓ Found {len(arch_themes)} themes in architecture data\n")
+print(f" Found {len(national_themes)} themes in national data")
+print(f" Found {len(paris_themes)} themes in Paris data")
+print(f" Found {len(au_themes)} themes in AU data")
+print(f" Found {len(arch_themes)} themes in architecture data\n")
 
-# ============================================================
-# HELPER FUNCTIONS FOR LABEL FITTING AND SPACING
-# ============================================================
 
 def wrap_labels(labels, width=10):
     """
@@ -183,7 +166,7 @@ def save_svg_heatmap(df, id_col, title, filename, figsize=None,
         for possible_id in possible_ids:
             if possible_id in plot_df.columns:
                 id_col = possible_id
-                print(f"    Using '{id_col}' as ID column for {filename}")
+                print(f" Using '{id_col}' as ID column for {filename}")
                 break
     
     plot_df = plot_df.set_index(id_col)
@@ -203,8 +186,8 @@ def save_svg_heatmap(df, id_col, title, filename, figsize=None,
     tick_step = 5 if vmax <= 50 else 10
     ticks = np.arange(vmin, vmax + tick_step, tick_step)
     
-    print(f"  Dataset range: {data_min:.1f}% to {data_max:.1f}%")
-    print(f"  Color scale: {vmin:.0f}% to {vmax:.0f}%")
+    print(f" Dataset range: {data_min:.1f}% to {data_max:.1f}%")
+    print(f" Color scale: {vmin:.0f}% to {vmax:.0f}%")
     
     # Set default figsize based on dataset size if not provided
     if figsize is None:
@@ -266,7 +249,7 @@ def save_svg_heatmap(df, id_col, title, filename, figsize=None,
     # Save as SVG in the figures directory
     full_path = figures_dir / filename
     plt.savefig(full_path, dpi=300, bbox_inches="tight", facecolor="white", format="svg")
-    print(f"✓ Saved: {full_path}")
+    print(f"Saved: {full_path}")
     plt.close()
 
 def save_line_plot(df, id_col, title, filename, figsize=(12, 6)):
@@ -276,8 +259,8 @@ def save_line_plot(df, id_col, title, filename, figsize=(12, 6)):
     plot_df = df.copy()
     
     # Check what the ID column actually is
-    print(f"  Line plot - using ID column: {id_col}")
-    print(f"  Available columns: {list(plot_df.columns)}")
+    print(f" Line plot - using ID column: {id_col}")
+    print(f" Available columns: {list(plot_df.columns)}")
     
     # If the specified id_col isn't found, try to find the most likely one
     if id_col not in plot_df.columns:
@@ -286,7 +269,7 @@ def save_line_plot(df, id_col, title, filename, figsize=(12, 6)):
         for possible_id in possible_ids:
             if possible_id in plot_df.columns:
                 id_col = possible_id
-                print(f"  Using '{id_col}' as ID column instead")
+                print(f" Using '{id_col}' as ID column instead")
                 break
     
     plot_df = plot_df.set_index(id_col)
@@ -323,19 +306,17 @@ def save_line_plot(df, id_col, title, filename, figsize=(12, 6)):
     # Save as SVG
     full_path = figures_dir / filename
     plt.savefig(full_path, dpi=300, bbox_inches="tight", facecolor="white", format="svg")
-    print(f"✓ Saved line plot: {full_path}")
+    print(f"Saved line plot: {full_path}")
     plt.close()
 
-# ============================================================
-# GENERATE SVG HEATMAPS
-# ============================================================
+#Heatmaps
 
 print("\n" + "="*80)
 print("GENERATING SVG HEATMAPS")
 print("="*80)
 
 # 1. National Climate Policies SVG Heatmap
-print("\n🏛️ National Climate Policies")
+print("\n National Climate Policies")
 save_svg_heatmap(
     df_national,
     id_col="country_or_category",
@@ -349,7 +330,7 @@ save_svg_heatmap(
 )
 
 # 2. Paris Agreement Submissions SVG Heatmap
-print("\n🌍 Paris Agreement Submissions")
+print("\n Paris Agreement Submissions")
 save_svg_heatmap(
     df_paris,
     id_col="country_or_category",
@@ -363,7 +344,7 @@ save_svg_heatmap(
 )
 
 # 3. AU Documents SVG Heatmap
-print("\n📄 African Union Documents")
+print("\n African Union Documents")
 save_svg_heatmap(
     df_au,
     id_col="document_type",
@@ -377,7 +358,7 @@ save_svg_heatmap(
 )
 
 # 4. Architecture Theme Shares - Line Plot
-print("\n🏗️  Governance Architecture Comparison")
+print("\n  Governance Architecture Comparison")
 save_line_plot(
     df_architecture,
     id_col="governance",  # Changed from "architecture" to "governance"
@@ -386,19 +367,16 @@ save_line_plot(
     figsize=(14, 7)
 )
 
-# ============================================================
-# SUMMARY
-# ============================================================
 
 print("\n" + "="*80)
-print("✅ ALL FIGURES GENERATED SUCCESSFULLY!")
+print("ALL FIGURES GENERATED SUCCESSFULLY!")
 print("="*80)
 
 print(f"\n📊 Files saved to: {figures_dir}")
 print("-" * 40)
-print(f"  ✓ {figures_dir / 'national_policies_heatmap.svg'}")
-print(f"  ✓ {figures_dir / 'paris_agreement_heatmap.svg'}")
-print(f"  ✓ {figures_dir / 'au_documents_heatmap.svg'}")
-print(f"  ✓ {figures_dir / 'architecture_comparison_lineplot.svg'}")
+print(f" {figures_dir / 'national_policies_heatmap.svg'}")
+print(f" {figures_dir / 'paris_agreement_heatmap.svg'}")
+print(f" {figures_dir / 'au_documents_heatmap.svg'}")
+print(f" {figures_dir / 'architecture_comparison_lineplot.svg'}")
 
-print(f"\n📁 You can find these in: {figures_dir}")
+print(f"You can find these in: {figures_dir}")
